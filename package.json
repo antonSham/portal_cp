@@ -1,0 +1,16 @@
+{
+  "name": "portal_cp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "knex": "^1.0.3",
+    "knex-migrate": "^1.7.4",
+    "pg": "^8.7.3"
+  }
+}
