@@ -15,7 +15,7 @@ exports.register = async ({ name, email, password }) => {
 };
 
 // request email confirmation (user)
-exports.requestEmailConfirmation = ({ userId }) => {
+exports.requestEmailConfirmation = async ({ userId }) => {
   // TODO: Generate confirmation code
   const confirmationCode = "0000";
   const [record] = await knex("users")
@@ -43,7 +43,7 @@ exports.requestEmailConfirmation = ({ userId }) => {
 };
 
 // confirm emall (any)
-exports.confirmEmail = ({ userId, confirmationCode }) => {
+exports.confirmEmail = async ({ userId, confirmationCode }) => {
   const [record] = await knex("users")
     .select(
       "email_is_confirmed as emailIsConfirmed",
@@ -54,6 +54,7 @@ exports.confirmEmail = ({ userId, confirmationCode }) => {
   if (
     !record ||
     record.emailConfirmationCode === null ||
+    record.emailIsConfirmed ||
     record.emailConfirmationCode !== confirmationCode
   ) {
     throw new ControllerException(
@@ -63,14 +64,14 @@ exports.confirmEmail = ({ userId, confirmationCode }) => {
   }
 
   await knex("users")
-    .update({ email_is_confirmed: true })
+    .update({ email_is_confirmed: true, email_confirmation_code: null })
     .where({ id: userId });
 
   return {};
 };
 
 // login (any)
-exports.login = ({ email, password }) => {
+exports.login = async ({ email, password }) => {
   // TODO: Hash password
   const [record] = await knex("users").select("id").where({ email, password });
 
@@ -82,7 +83,7 @@ exports.login = ({ email, password }) => {
 };
 
 // edit profile (user)
-exports.editProfile = ({ userId, name, email, password }) => {
+exports.editProfile = async ({ userId, name, email, password }) => {
   const [record] = await knex("users")
     .select("id", "name", "email", "password")
     .where({ id: userId });
@@ -108,7 +109,7 @@ exports.editProfile = ({ userId, name, email, password }) => {
 };
 
 // change role (admin)
-exports.changeRole = ({ userId, role }) => {
+exports.changeRole = async ({ userId, role }) => {
   const [record] = await knex("users").select("id").where({ id: userId });
 
   if (!record) {
@@ -118,4 +119,18 @@ exports.changeRole = ({ userId, role }) => {
   await knex("users").update({ role }).where({ id: userId });
 
   return {};
+};
+
+exports.getUserById = async ({ userId }) => {
+  const [record] = await knex("users")
+    .select(
+      "id",
+      "name",
+      "email",
+      "role",
+      "email_is_confirmed as emailIsConfirmed"
+    )
+    .where({ id: userId });
+
+  return record;
 };

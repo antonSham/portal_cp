@@ -6,7 +6,8 @@
   "scripts": {
     "migrate:up": "knex-migrate up",
     "migrate:down": "knex-migrate down",
-    "seed": "knex seed:run"
+    "seed": "knex seed:run",
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
@@ -15,5 +16,8 @@
     "knex": "^1.0.3",
     "knex-migrate": "^1.7.4",
     "pg": "^8.7.3"
+  },
+  "devDependencies": {
+    "jest": "^27.5.1"
   }
 }
