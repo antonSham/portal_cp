@@ -4,6 +4,7 @@ const knex = require("../utils/db");
 // register (any)
 exports.register = async ({ name, email, password }) => {
   try {
+    // TODO: Hash password
     const [{ id: userId }] = await knex("users")
       .insert([{ name, email, password }])
       .returning("id");
@@ -15,31 +16,106 @@ exports.register = async ({ name, email, password }) => {
 
 // request email confirmation (user)
 exports.requestEmailConfirmation = ({ userId }) => {
+  // TODO: Generate confirmation code
   const confirmationCode = "0000";
-  // Write to database
-    await knex(...)
+  const [record] = await knex("users")
+    .select("email_is_confirmed as emailIsConfirmed")
+    .where({ id: userId });
 
-  //Send email
+  if (!record) {
+    throw new ControllerException("NOT_FOUND", "User has not been found");
+  }
+
+  if (record.emailIsConfirmed) {
+    throw new ControllerException(
+      "ALREADY_CONFIRMED",
+      "User has already confirmed their email"
+    );
+  }
+
+  await knex("users")
+    .update({ email_confirmation_code: confirmationCode })
+    .where({ id: userId });
+
+  // TODO: Send email
 
   return {};
 };
 
 // confirm emall (any)
 exports.confirmEmail = ({ userId, confirmationCode }) => {
+  const [record] = await knex("users")
+    .select(
+      "email_is_confirmed as emailIsConfirmed",
+      "email_confirmation_code as emailConfirmationCode"
+    )
+    .where({ id: userId });
+
+  if (
+    !record ||
+    record.emailConfirmationCode === null ||
+    record.emailConfirmationCode !== confirmationCode
+  ) {
+    throw new ControllerException(
+      "FORBIDDEN",
+      "Wrong userId or confirmationCode"
+    );
+  }
+
+  await knex("users")
+    .update({ email_is_confirmed: true })
+    .where({ id: userId });
+
   return {};
 };
 
 // login (any)
 exports.login = ({ email, password }) => {
-  return { userId };
+  // TODO: Hash password
+  const [record] = await knex("users").select("id").where({ email, password });
+
+  if (!record) {
+    throw new ControllerException("WRONG_CREDENTIALS", "Wrong credentials");
+  }
+
+  return { userId: record.id };
 };
 
 // edit profile (user)
 exports.editProfile = ({ userId, name, email, password }) => {
+  const [record] = await knex("users")
+    .select("id", "name", "email", "password")
+    .where({ id: userId });
+
+  if (!record) {
+    throw new ControllerException("NOT_FOUND", "User has not been found");
+  }
+
+  const patch = {};
+  if (name) patch.name = name;
+  if (email) {
+    patch.email = email;
+    patch.email_is_confirmed = false;
+    // TODO: Generate confirmation code
+    patch.email_confirmation_code = "0000";
+  }
+  // TODO: Hash password
+  if (password) patch.password = password;
+
+  await knex("users").update(patch).where({ id: userId });
+
   return {};
 };
 
 // change role (admin)
 exports.changeRole = ({ userId, role }) => {
+  const [record] = await knex("users").select("id").where({ id: userId });
+
+  if (!record) {
+    throw new ControllerException("NOT_FOUND", "User has not been found");
+  }
+
+  await knex("users").update({ role }).where({ id: userId });
+
   return {};
 };
