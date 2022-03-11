@@ -1,5 +1,5 @@
 const express = require("express");
-const {wrap} = require("async-middleware");
+const { wrap } = require("async-middleware");
 const usersController = require("../controllers/users");
 const { sign: signToken } = require("../utils/token");
 const auth = require("./middelwares/auth");
@@ -47,10 +47,13 @@ router.post(
   "/login",
   wrap(async (req, res) => {
     const { email, password } = req.body;
-    const { userId } = await usersController.login({ email, password });
+    const { userId, userRole } = await usersController.login({
+      email,
+      password,
+    });
 
     const token = signToken(userId);
-    res.send({ success: true, token });
+    res.send({ success: true, token, role: userRole });
   })
 );
 
@@ -58,11 +61,15 @@ router.post(
   "/profile/edit",
   auth("user"),
   wrap(async (req, res) => {
-    const { email, password } = req.body;
-    const { userId } = await usersController.login({ email, password });
+    const { name, email, password } = req.body;
+    await usersController.editProfile({
+      userId: req.user.id,
+      name,
+      email,
+      password,
+    });
 
-    const token = signToken(userId);
-    res.send({ success: true, token });
+    res.send({ success: true });
   })
 );
 

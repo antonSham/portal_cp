@@ -73,13 +73,15 @@ exports.confirmEmail = async ({ userId, confirmationCode }) => {
 // login (any)
 exports.login = async ({ email, password }) => {
   // TODO: Hash password
-  const [record] = await knex("users").select("id").where({ email, password });
+  const [record] = await knex("users")
+    .select("id", "role")
+    .where({ email, password });
 
   if (!record) {
     throw new ControllerException("WRONG_CREDENTIALS", "Wrong credentials");
   }
 
-  return { userId: record.id };
+  return { userId: record.id, userRole: record.role };
 };
 
 // edit profile (user)
