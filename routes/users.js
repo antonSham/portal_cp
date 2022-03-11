@@ -1,8 +1,10 @@
 const express = require("express");
 const { wrap } = require("async-middleware");
+const { body } = require("express-validator");
 const usersController = require("../controllers/users");
 const { sign: signToken } = require("../utils/token");
 const auth = require("./middelwares/auth");
+const validate = require("./middelwares/validate");
 
 const router = express.Router();
 
@@ -45,6 +47,9 @@ router.get(
 
 router.post(
   "/login",
+  body("email").isEmail(),
+  body("password").isString(),
+  validate(),
   wrap(async (req, res) => {
     const { email, password } = req.body;
     const { userId, userRole } = await usersController.login({
@@ -76,6 +81,11 @@ router.post(
 router.post(
   "/role/change",
   auth("admin"),
+  body("userId").isNumeric(),
+  body("role").custom(
+    (value) => ["user", "editor", "admin"].indexOf(value) >= 0
+  ),
+  validate(),
   wrap(async (req, res) => {
     const { userId, role } = req.body;
     await usersController.changeRole({ userId, role });
