@@ -132,5 +132,28 @@ exports.getUserById = async ({ userId }) => {
     )
     .where({ id: userId });
 
+  if (!record) {
+    throw new ControllerException("USER_NOT_FOUND", "User has not been found");
+  }
+
+  return record;
+};
+
+exports.getUsersList = async ({ limit, offset }) => {
+  const [record] = await knex("users")
+    .select(
+      "id",
+      "name",
+      "email",
+      "role",
+      "email_is_confirmed as emailIsConfirmed"
+    )
+    .limit(limit)
+    .offset(offset);
+
+  if (!record) {
+    throw new ControllerException("USER_NOT_FOUND", "User has not been found");
+  }
+
   return record;
 };

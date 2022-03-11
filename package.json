@@ -7,12 +7,17 @@
     "migrate:up": "knex-migrate up",
     "migrate:down": "knex-migrate down",
     "seed": "knex seed:run",
-    "test": "jest"
+    "test": "jest",
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "add": "^2.0.6",
+    "async-middleware": "^1.2.1",
     "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "jsonwebtoken": "^8.5.1",
     "knex": "^1.0.3",
     "knex-migrate": "^1.7.4",
     "pg": "^8.7.3"
